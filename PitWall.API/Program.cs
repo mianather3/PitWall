@@ -1,3 +1,5 @@
+using OpenAI.Chat;
+
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -13,6 +15,7 @@ app.UseSwagger();
 app.UseSwaggerUI();
 app.UseCors();
 
+// Get all 2025 F1 sessions
 app.MapGet("/api/session", async (IHttpClientFactory factory) =>
 {
     var client = factory.CreateClient();
@@ -21,6 +24,7 @@ app.MapGet("/api/session", async (IHttpClientFactory factory) =>
     return Results.Content(response, "application/json");
 });
 
+// Get driver positions for a session
 app.MapGet("/api/positions/{sessionKey}", async (int sessionKey, IHttpClientFactory factory) =>
 {
     var client = factory.CreateClient();
@@ -29,4 +33,54 @@ app.MapGet("/api/positions/{sessionKey}", async (int sessionKey, IHttpClientFact
     return Results.Content(response, "application/json");
 });
 
+// AI pit stop strategy endpoint
+app.MapPost("/api/strategy", async (StrategyRequest request) =>
+{
+    var apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
+    if (string.IsNullOrEmpty(apiKey))
+        return Results.Problem("OpenAI API key not configured");
+
+    var chatClient = new ChatClient("gpt-4o-mini", apiKey);
+
+    var prompt = $"""
+        You are an expert Formula 1 race strategist. Analyze the following race situation and provide a concise pit stop strategy recommendation.
+
+        Race: {request.CircuitName}, {request.CountryName}
+        Driver: {request.DriverName} (Car #{request.DriverNumber})
+        Current Lap: {request.CurrentLap} of {request.TotalLaps}
+        Current Position: P{request.Position}
+        Tire Compound: {request.TireCompound}
+        Tire Age: {request.TireAge} laps
+        Gap to car ahead: {request.GapAhead} seconds
+        Gap to car behind: {request.GapBehind} seconds
+
+        Provide:
+        1. Pit stop recommendation (pit now / stay out / prepare to pit)
+        2. Recommended tire compound for next stint
+        3. Brief reasoning (2-3 sentences max)
+        4. Risk level (Low / Medium / High)
+
+        Be direct and concise like a real F1 strategist on the pit wall radio.
+        """;
+
+    var completion = await chatClient.CompleteChatAsync(prompt);
+    var strategy = completion.Value.Content[0].Text;
+
+    return Results.Ok(new { strategy, generatedAt = DateTime.UtcNow });
+});
+
 app.Run();
+
+record StrategyRequest(
+    string CircuitName,
+    string CountryName,
+    string DriverName,
+    int DriverNumber,
+    int CurrentLap,
+    int TotalLaps,
+    int Position,
+    string TireCompound,
+    int TireAge,
+    double GapAhead,
+    double GapBehind
+);
