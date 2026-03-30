@@ -1,47 +1,71 @@
 import SwiftUI
 
 struct ContentView: View {
+    @StateObject private var viewModel = RaceViewModel()
+    
     var body: some View {
         NavigationView {
             ZStack {
                 Color.black.ignoresSafeArea()
                 
-                VStack(spacing: 24) {
+                VStack(spacing: 0) {
                     // Header
                     HStack {
                         Image(systemName: "flag.checkered")
                             .foregroundColor(.red)
-                            .font(.system(size: 28))
+                            .font(.system(size: 24))
                         Text("PitWall")
-                            .font(.system(size: 32, weight: .bold))
+                            .font(.system(size: 28, weight: .bold))
                             .foregroundColor(.white)
+                        Spacer()
                     }
+                    .padding()
                     
-                    Text("Your AI Race Strategist")
-                        .font(.subheadline)
+                    Text("2025 Race Calendar")
+                        .font(.caption)
                         .foregroundColor(.gray)
-                    
-                    // Status card
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(Color(white: 0.12))
-                        .frame(height: 120)
-                        .overlay(
-                            VStack {
-                                Text("No Active Session")
-                                    .foregroundColor(.white)
-                                    .font(.headline)
-                                Text("Race data will appear here")
-                                    .foregroundColor(.gray)
-                                    .font(.caption)
-                            }
-                        )
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal)
                     
-                    Spacer()
+                    if viewModel.isLoading {
+                        Spacer()
+                        ProgressView()
+                            .tint(.red)
+                        Text("Loading race data...")
+                            .foregroundColor(.gray)
+                            .padding()
+                        Spacer()
+                    } else if let error = viewModel.errorMessage {
+                        Spacer()
+                        Text(error)
+                            .foregroundColor(.red)
+                            .padding()
+                        Spacer()
+                    } else {
+                        List(viewModel.sessions) { session in
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(session.circuitShortName)
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                                Text(session.countryName)
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
+                                Text(session.dateStart.prefix(10))
+                                    .font(.caption)
+                                    .foregroundColor(.red)
+                            }
+                            .padding(.vertical, 4)
+                            .listRowBackground(Color(white: 0.1))
+                        }
+                        .listStyle(.plain)
+                        .scrollContentBackground(.hidden)
+                    }
                 }
-                .padding(.top, 60)
             }
             .navigationBarHidden(true)
+            .task {
+                await viewModel.fetchSessions()
+            }
         }
     }
 }
