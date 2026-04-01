@@ -3,7 +3,8 @@
 > Your AI-powered Formula 1 pit stop strategy engine, built for the pit wall.
 
 ## 🚀 Live Demo
-**Backend API:** https://pitwallapi.azurewebsites.net/api/session
+- **Web App:** https://pit-wall-drab.vercel.app
+- **Backend API:** https://pitwallapi.azurewebsites.net/api/session
 
 ## 📱 What It Does
 PitWall is a full-stack iOS app that gives Formula 1 fans real-time AI-powered race strategy recommendations — just like a real pit wall strategist.
@@ -50,5 +51,5 @@ The strategy engine analyzes:
 And returns a structured recommendation including pit timing, tire compound suggestion, strategic reasoning, and risk level.
 
 ## 🏎️ Built By
-**Mian Ather Ali** — CS/DS Student, University of Utah Honors College  
+**Mian Ather Ali** — CS Student, University of Utah Honors College  
 [LinkedIn](https://linkedin.com/in/mianather) | [GitHub](https://github.com/mianather3) | [Portfolio](https://mianather3.github.io/Portfolio/)
