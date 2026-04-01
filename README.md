@@ -3,7 +3,7 @@
 > Your AI-powered Formula 1 pit stop strategy engine, built for the pit wall.
 
 ## 🚀 Live Demo
-- **Web App:** https://pit-wall-drab.vercel.app
+- **Web App:** https://pitwallapp.vercel.app
 - **Backend API:** https://pitwallapi.azurewebsites.net/api/session
 
 ## 📱 What It Does
