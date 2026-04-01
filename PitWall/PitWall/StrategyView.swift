@@ -173,7 +173,7 @@ struct StrategyView: View {
         isLoading = true
         strategyResult = ""
         
-        guard let url = URL(string: "http://localhost:5211/api/strategy") else { return }
+        guard let url = URL(string: "http://pitwallapi.azurewebsites.net/api/strategy") else { return }
         
         let requestBody = StrategyRequest(
             circuitName: session.circuitShortName,
