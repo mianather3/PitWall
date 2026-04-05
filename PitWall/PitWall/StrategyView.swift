@@ -21,9 +21,17 @@ struct StrategyResponse: Codable {
 
 struct StrategyView: View {
     let session: RaceSession
+    var prefilledDriver: Driver? = nil
     
-    @State private var driverName = "Max Verstappen"
-    @State private var driverNumber = "1"
+    @State private var driverName: String
+    @State private var driverNumber: String
+
+    init(session: RaceSession, prefilledDriver: Driver? = nil) {
+        self.session = session
+        self._driverName = State(initialValue: prefilledDriver?.fullName ?? "Max Verstappen")
+        self._driverNumber = State(initialValue: prefilledDriver.map { "\($0.driverNumber)" } ?? "1")
+    }
+    
     @State private var currentLap = "30"
     @State private var totalLaps = "57"
     @State private var position = "2"
@@ -173,7 +181,7 @@ struct StrategyView: View {
         isLoading = true
         strategyResult = ""
         
-        guard let url = URL(string: "http://pitwallapi.azurewebsites.net/api/strategy") else { return }
+        guard let url = URL(string: "https://pitwallapi.azurewebsites.net/api/strategy") else { return }
         
         let requestBody = StrategyRequest(
             circuitName: session.circuitShortName,

@@ -21,7 +21,7 @@ struct ContentView: View {
                     }
                     .padding()
                     
-                    Text("2025 Race Calendar — Tap a race for AI Strategy")
+                    Text("2025 Race Calendar — Tap a race for Driver Standings")
                         .font(.caption)
                         .foregroundColor(.gray)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -41,7 +41,7 @@ struct ContentView: View {
                         Spacer()
                     } else {
                         List(viewModel.sessions) { session in
-                            NavigationLink(destination: StrategyView(session: session)) {
+                            NavigationLink(destination: DriverDashboardView(session: session)) {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text(session.circuitShortName)
                                         .font(.headline)

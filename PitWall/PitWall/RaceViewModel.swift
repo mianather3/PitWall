@@ -11,7 +11,7 @@ class RaceViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
         
-        guard let url = URL(string: "http://pitwallapi.azurewebsites.net/api/session") else {
+        guard let url = URL(string: "https://pitwallapi.azurewebsites.net/api/session") else {
             errorMessage = "Invalid URL"
             isLoading = false
             return
