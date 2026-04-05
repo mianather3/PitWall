@@ -12,6 +12,7 @@ struct StrategyRequest: Codable {
     let tireAge: Int
     let gapAhead: Double
     let gapBehind: Double
+    let weatherCondition: String
 }
 
 struct StrategyResponse: Codable {
@@ -39,6 +40,7 @@ struct StrategyView: View {
     @State private var tireAge = "15"
     @State private var gapAhead = "1.2"
     @State private var gapBehind = "3.5"
+    @State private var weatherCondition = "Dry"
     
     @State private var strategyResult = ""
     @State private var isLoading = false
@@ -78,6 +80,9 @@ struct StrategyView: View {
                         inputField("Gap Ahead (sec)", text: $gapAhead)
                         inputField("Gap Behind (sec)", text: $gapBehind)
                     }
+                    
+                    // Weather selector
+                    WeatherSelector(selected: $weatherCondition)
                     
                     // Tire selector
                     VStack(alignment: .leading, spacing: 8) {
@@ -194,7 +199,8 @@ struct StrategyView: View {
             tireCompound: tireCompound,
             tireAge: Int(tireAge) ?? 0,
             gapAhead: Double(gapAhead) ?? 0,
-            gapBehind: Double(gapBehind) ?? 0
+            gapBehind: Double(gapBehind) ?? 0,
+            weatherCondition: weatherCondition
         )
         
         var request = URLRequest(url: url)
