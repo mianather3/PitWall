@@ -53,6 +53,7 @@ app.MapPost("/api/strategy", async (StrategyRequest request) =>
         Tire Age: {request.TireAge} laps
         Gap to car ahead: {request.GapAhead} seconds
         Gap to car behind: {request.GapBehind} seconds
+        Track Conditions: {request.WeatherCondition}
 
         Provide:
         1. Pit stop recommendation (pit now / stay out / prepare to pit)
@@ -82,5 +83,6 @@ record StrategyRequest(
     string TireCompound,
     int TireAge,
     double GapAhead,
-    double GapBehind
+    double GapBehind,
+    string WeatherCondition
 );
