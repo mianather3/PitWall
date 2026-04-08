@@ -33,8 +33,8 @@ struct StrategyView: View {
         self._driverNumber = State(initialValue: prefilledDriver.map { "\($0.driverNumber)" } ?? "1")
     }
     
-    @State private var currentLap = "30"
-    @State private var totalLaps = "57"
+    @State private var currentLap = 30
+    @State private var totalLaps = 57
     @State private var position = "2"
     @State private var tireCompound = "Medium"
     @State private var tireAge = "15"
@@ -73,8 +73,8 @@ struct StrategyView: View {
                     Group {
                         inputField("Driver Name", text: $driverName)
                         inputField("Driver Number", text: $driverNumber)
-                        inputField("Current Lap", text: $currentLap)
-                        inputField("Total Laps", text: $totalLaps)
+                        stepperField("Current Lap", value: $currentLap, range: 1...100)
+                        stepperField("Total Laps", value: $totalLaps, range: 1...100)
                         inputField("Position", text: $position)
                         inputField("Tire Age (laps)", text: $tireAge)
                         inputField("Gap Ahead (sec)", text: $gapAhead)
@@ -171,6 +171,36 @@ struct StrategyView: View {
         .padding(.vertical, 4)
     }
     
+    func stepperField(_ label: String, value: Binding<Int>, range: ClosedRange<Int>) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(label)
+                .font(.caption)
+                .foregroundColor(.gray)
+            HStack {
+                Button(action: { if value.wrappedValue > range.lowerBound { value.wrappedValue -= 1 } }) {
+                    Image(systemName: "minus.circle.fill")
+                        .foregroundColor(.red)
+                        .font(.system(size: 24))
+                }
+                Spacer()
+                Text("\(value.wrappedValue)")
+                    .foregroundColor(.white)
+                    .font(.system(size: 18, weight: .bold))
+                Spacer()
+                Button(action: { if value.wrappedValue < range.upperBound { value.wrappedValue += 1 } }) {
+                    Image(systemName: "plus.circle.fill")
+                        .foregroundColor(.red)
+                        .font(.system(size: 24))
+                }
+            }
+            .padding(10)
+            .background(Color(white: 0.15))
+            .cornerRadius(8)
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 4)
+    }
+    
     func tireColor(_ tire: String) -> Color {
         switch tire {
         case "Soft": return .red
@@ -193,8 +223,8 @@ struct StrategyView: View {
             countryName: session.countryName,
             driverName: driverName,
             driverNumber: Int(driverNumber) ?? 1,
-            currentLap: Int(currentLap) ?? 1,
-            totalLaps: Int(totalLaps) ?? 57,
+            currentLap: currentLap,
+            totalLaps: totalLaps,
             position: Int(position) ?? 1,
             tireCompound: tireCompound,
             tireAge: Int(tireAge) ?? 0,
