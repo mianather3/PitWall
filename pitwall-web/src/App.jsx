@@ -59,6 +59,7 @@ function StrategyForm({ session, onBack }) {
     currentLap: 30, totalLaps: 57, position: 2,
     tireCompound: "Medium", tireAge: 15,
     gapAhead: 1.2, gapBehind: 3.5,
+    weatherCondition: "Dry",
   });
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
@@ -81,6 +82,7 @@ function StrategyForm({ session, onBack }) {
         tireAge: Number(form.tireAge),
         gapAhead: Number(form.gapAhead),
         gapBehind: Number(form.gapBehind),
+        weatherCondition: form.weatherCondition,
       });
       setResult(res.data.strategy);
     } catch {
@@ -126,6 +128,29 @@ function StrategyForm({ session, onBack }) {
               color: form.tireCompound === t && t === "Hard" ? "#000" : form.tireCompound === t ? "#000" : "#fff",
               borderColor: form.tireCompound === t ? tireColors[t] : "#333",
             }}>{t}</button>
+        ))}
+      </div>
+      
+      <div style={styles.weatherRow}>
+        {[
+          { name: "Dry", icon: "☀️" },
+          { name: "Cloudy", icon: "☁️" },
+          { name: "Light Rain", icon: "🌦️" },
+          { name: "Heavy Rain", icon: "🌧️" },
+          { name: "Safety Car", icon: "🚗" },
+        ].map((w) => (
+          <button key={w.name} onClick={() => set("weatherCondition", w.name)}
+            style={{
+              ...styles.tire,
+              background: form.weatherCondition === w.name ? "#1e3a5f" : "#1a1a1a",
+              borderColor: form.weatherCondition === w.name ? "#4a9eff" : "#333",
+              color: "#fff",
+              display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
+              padding: "8px 12px",
+            }}>
+            <span style={{ fontSize: 18 }}>{w.icon}</span>
+            <span style={{ fontSize: 11 }}>{w.name}</span>
+          </button>
         ))}
       </div>
 
@@ -193,4 +218,5 @@ const styles = {
   resultHeader: { display: "flex", alignItems: "center", gap: 8, marginBottom: 12 },
   resultTitle: { color: "#e8002d", fontWeight: 700, fontSize: 13, letterSpacing: 1 },
   resultText: { color: "#fff", fontFamily: "monospace", fontSize: 14, lineHeight: 1.6, whiteSpace: "pre-wrap", margin: 0 },
+  weatherRow: { display: "flex", gap: 8, marginBottom: 24, flexWrap: "wrap" },
 };
