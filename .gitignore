@@ -426,3 +426,7 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+.DS_Store
+**/.DS_Store
+generate_icon.py
+pitwall_icon.png
