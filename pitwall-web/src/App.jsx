@@ -11,6 +11,14 @@ const tireColors = {
   Wet: "#0067ff",
 };
 
+const weatherOptions = [
+  { name: "Dry", icon: "☀️" },
+  { name: "Cloudy", icon: "☁️" },
+  { name: "Light Rain", icon: "🌦️" },
+  { name: "Heavy Rain", icon: "🌧️" },
+  { name: "Safety Car", icon: "🚗" },
+];
+
 function SessionList({ onSelect }) {
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -36,7 +44,7 @@ function SessionList({ onSelect }) {
 
   return (
     <div>
-      <p style={styles.subtitle}>2025 Race Calendar — Select a race for AI Strategy</p>
+      <p style={styles.subtitle}>2025 Race Calendar — Select a race to view drivers</p>
       <div style={styles.grid}>
         {sessions.map((s) => (
           <div key={s.session_key} style={styles.card} onClick={() => onSelect(s)}
@@ -53,9 +61,153 @@ function SessionList({ onSelect }) {
   );
 }
 
-function StrategyForm({ session, onBack }) {
+const circuitDatabase = {
+  "Melbourne": { laps: 58, length: "5.278 km", lapRecord: "1:20.235", holder: "Charles Leclerc", year: 2022, drs: 4, firstGP: 1996 },
+  "Shanghai": { laps: 56, length: "5.451 km", lapRecord: "1:32.238", holder: "Michael Schumacher", year: 2004, drs: 2, firstGP: 2004 },
+  "Suzuka": { laps: 53, length: "5.807 km", lapRecord: "1:30.983", holder: "Valtteri Bottas", year: 2019, drs: 1, firstGP: 1987 },
+  "Sakhir": { laps: 57, length: "5.412 km", lapRecord: "1:31.447", holder: "Pedro de la Rosa", year: 2005, drs: 3, firstGP: 2004 },
+  "Jeddah": { laps: 50, length: "6.174 km", lapRecord: "1:30.734", holder: "Lewis Hamilton", year: 2021, drs: 3, firstGP: 2021 },
+  "Miami Gardens": { laps: 57, length: "5.412 km", lapRecord: "1:29.708", holder: "Max Verstappen", year: 2023, drs: 3, firstGP: 2022 },
+  "Imola": { laps: 63, length: "4.909 km", lapRecord: "1:15.484", holder: "Rubens Barrichello", year: 2004, drs: 2, firstGP: 1980 },
+  "Monaco": { laps: 78, length: "3.337 km", lapRecord: "1:12.909", holder: "Rubens Barrichello", year: 2004, drs: 1, firstGP: 1950 },
+  "Catalunya": { laps: 66, length: "4.657 km", lapRecord: "1:18.149", holder: "Max Verstappen", year: 2021, drs: 2, firstGP: 1991 },
+  "Montreal": { laps: 70, length: "4.361 km", lapRecord: "1:13.078", holder: "Valtteri Bottas", year: 2019, drs: 2, firstGP: 1978 },
+  "Spielberg": { laps: 71, length: "4.318 km", lapRecord: "1:05.619", holder: "Carlos Sainz", year: 2020, drs: 3, firstGP: 1970 },
+  "Silverstone": { laps: 52, length: "5.891 km", lapRecord: "1:27.097", holder: "Max Verstappen", year: 2020, drs: 2, firstGP: 1950 },
+  "Hungaroring": { laps: 70, length: "4.381 km", lapRecord: "1:16.627", holder: "Lewis Hamilton", year: 2020, drs: 2, firstGP: 1986 },
+  "Spa-Francorchamps": { laps: 44, length: "7.004 km", lapRecord: "1:46.286", holder: "Valtteri Bottas", year: 2018, drs: 2, firstGP: 1950 },
+  "Zandvoort": { laps: 72, length: "4.259 km", lapRecord: "1:11.097", holder: "Lewis Hamilton", year: 2021, drs: 2, firstGP: 1952 },
+  "Monza": { laps: 53, length: "5.793 km", lapRecord: "1:21.046", holder: "Rubens Barrichello", year: 2004, drs: 2, firstGP: 1950 },
+  "Baku": { laps: 51, length: "6.003 km", lapRecord: "1:43.009", holder: "Charles Leclerc", year: 2019, drs: 2, firstGP: 2016 },
+  "Marina Bay": { laps: 62, length: "4.940 km", lapRecord: "1:35.867", holder: "Lewis Hamilton", year: 2023, drs: 3, firstGP: 2008 },
+  "Austin": { laps: 56, length: "5.513 km", lapRecord: "1:36.169", holder: "Charles Leclerc", year: 2019, drs: 2, firstGP: 2012 },
+  "Mexico City": { laps: 71, length: "4.304 km", lapRecord: "1:17.774", holder: "Valtteri Bottas", year: 2021, drs: 3, firstGP: 1963 },
+  "Interlagos": { laps: 71, length: "4.309 km", lapRecord: "1:10.540", holder: "Valtteri Bottas", year: 2018, drs: 2, firstGP: 1973 },
+  "Las Vegas": { laps: 50, length: "6.201 km", lapRecord: "1:35.490", holder: "Oscar Piastri", year: 2024, drs: 2, firstGP: 2023 },
+  "Lusail": { laps: 57, length: "5.380 km", lapRecord: "1:24.319", holder: "Max Verstappen", year: 2023, drs: 2, firstGP: 2021 },
+  "Yas Island": { laps: 58, length: "5.281 km", lapRecord: "1:26.103", holder: "Max Verstappen", year: 2021, drs: 2, firstGP: 2009 },
+};
+
+function RaceInfo({ session, onViewDrivers, onBack }) {
+  const info = circuitDatabase[session.circuit_short_name] || circuitDatabase[session.location];
+
+  return (
+    <div style={styles.formWrap}>
+      <button style={styles.back} onClick={onBack}>← Back</button>
+      <div style={styles.raceHeader}>
+        <span style={{ fontSize: 24 }}>🏁</span>
+        <div>
+          <div style={styles.raceName}>{session.circuit_short_name}</div>
+          <div style={{ color: "#888", fontSize: 13 }}>{session.country_name}</div>
+        </div>
+        <span style={{ color: "#e8002d", fontSize: 13, marginLeft: "auto" }}>{session.date_start?.slice(0, 10)}</span>
+      </div>
+
+      {info ? (
+        <>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
+            {[
+              { icon: "🔄", label: "Laps", value: info.laps },
+              { icon: "📏", label: "Circuit Length", value: info.length },
+              { icon: "⚡", label: "DRS Zones", value: info.drs },
+              { icon: "📅", label: "First GP", value: info.firstGP },
+            ].map((s) => (
+              <div key={s.label} style={{ background: "#111", borderRadius: 12, padding: 20, textAlign: "center" }}>
+                <div style={{ fontSize: 24, marginBottom: 8 }}>{s.icon}</div>
+                <div style={{ color: "#fff", fontWeight: 700, fontSize: 18 }}>{s.value}</div>
+                <div style={{ color: "#888", fontSize: 12, marginTop: 4 }}>{s.label}</div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ background: "#111", borderRadius: 12, padding: 20, border: "1px solid #e8002d44", marginBottom: 24 }}>
+            <div style={{ color: "#e8002d", fontWeight: 700, fontSize: 12, letterSpacing: 1, marginBottom: 12 }}>⏱ LAP RECORD</div>
+            <div style={{ color: "#fff", fontFamily: "monospace", fontSize: 36, fontWeight: 700 }}>{info.lapRecord}</div>
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8 }}>
+              <span style={{ color: "#888" }}>{info.holder}</span>
+              <span style={{ color: "#888" }}>{info.year}</span>
+            </div>
+          </div>
+        </>
+      ) : (
+        <p style={{ color: "#888" }}>Circuit data not available</p>
+      )}
+
+      <button style={styles.btn} onClick={onViewDrivers}>
+        👥 View Driver Standings
+      </button>
+    </div>
+  );
+}
+
+function DriverList({ session, onSelectDriver, onBack }) {
+  const [drivers, setDrivers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    axios.get(`https://api.openf1.org/v1/drivers?session_key=${session.session_key}`)
+      .then((res) => {
+        const unique = Object.values(
+          res.data.reduce((acc, d) => {
+            if (!acc[d.driver_number]) acc[d.driver_number] = d;
+            return acc;
+          }, {})
+        ).sort((a, b) => (a.position ?? 99) - (b.position ?? 99));
+        setDrivers(unique);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
+  return (
+    <div style={styles.formWrap}>
+      <button style={styles.back} onClick={onBack}>← Back</button>
+      <div style={styles.raceHeader}>
+        <span style={{ fontSize: 24 }}>🏁</span>
+        <span style={styles.raceName}>{session.circuit_short_name}</span>
+        <span style={styles.raceCountry}>{session.country_name}</span>
+      </div>
+
+      {loading ? (
+        <div style={styles.center}>
+          <div style={styles.spinner} />
+          <p style={{ color: "#888", marginTop: 16 }}>Loading drivers...</p>
+        </div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {drivers.map((d) => {
+            const color = d.team_colour ? `#${d.team_colour}` : "#666";
+            return (
+              <div key={d.driver_number}
+                onClick={() => onSelectDriver(d)}
+                style={{
+                  display: "flex", alignItems: "center", gap: 16,
+                  background: "#111", borderRadius: 12, padding: "14px 16px",
+                  cursor: "pointer", border: `1px solid #222`,
+                  transition: "border-color 0.2s",
+                }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = color}
+                onMouseLeave={e => e.currentTarget.style.borderColor = "#222"}>
+                <div style={{ width: 4, height: 44, background: color, borderRadius: 2, flexShrink: 0 }} />
+                <div style={{ flex: 1 }}>
+                  <div style={{ color: "#fff", fontWeight: 600, fontSize: 15 }}>{d.full_name}</div>
+                  <div style={{ color: "#888", fontSize: 13 }}>{d.team_name}</div>
+                </div>
+                <div style={{ color, fontWeight: 700, fontSize: 14 }}>#{d.driver_number}</div>
+                <div style={{ color: "#555", fontSize: 12 }}>→</div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function StrategyForm({ session, driver, onBack }) {
   const [form, setForm] = useState({
-    driverName: "Max Verstappen", driverNumber: 1,
+    driverName: driver?.full_name ?? "Max Verstappen",
+    driverNumber: driver?.driver_number ?? 1,
     currentLap: 30, totalLaps: 57, position: 2,
     tireCompound: "Medium", tireAge: 15,
     gapAhead: 1.2, gapBehind: 3.5,
@@ -91,12 +243,17 @@ function StrategyForm({ session, onBack }) {
     setLoading(false);
   };
 
+  const teamColor = driver?.team_colour ? `#${driver.team_colour}` : "#e8002d";
+
   return (
     <div style={styles.formWrap}>
       <button style={styles.back} onClick={onBack}>← Back</button>
-      <div style={styles.raceHeader}>
+      <div style={{ ...styles.raceHeader, borderLeft: `4px solid ${teamColor}` }}>
         <span style={{ fontSize: 24 }}>🏁</span>
-        <span style={styles.raceName}>{session.circuit_short_name}</span>
+        <div>
+          <div style={styles.raceName}>{session.circuit_short_name}</div>
+          <div style={{ color: "#888", fontSize: 13 }}>{form.driverName} #{form.driverNumber}</div>
+        </div>
         <span style={styles.raceCountry}>{session.country_name}</span>
       </div>
 
@@ -130,15 +287,9 @@ function StrategyForm({ session, onBack }) {
             }}>{t}</button>
         ))}
       </div>
-      
+
       <div style={styles.weatherRow}>
-        {[
-          { name: "Dry", icon: "☀️" },
-          { name: "Cloudy", icon: "☁️" },
-          { name: "Light Rain", icon: "🌦️" },
-          { name: "Heavy Rain", icon: "🌧️" },
-          { name: "Safety Car", icon: "🚗" },
-        ].map((w) => (
+        {weatherOptions.map((w) => (
           <button key={w.name} onClick={() => set("weatherCondition", w.name)}
             style={{
               ...styles.tire,
@@ -173,6 +324,8 @@ function StrategyForm({ session, onBack }) {
 
 export default function App() {
   const [selected, setSelected] = useState(null);
+  const [showDrivers, setShowDrivers] = useState(false);
+  const [selectedDriver, setSelectedDriver] = useState(null);
 
   return (
     <div style={styles.app}>
@@ -181,9 +334,28 @@ export default function App() {
         <span style={styles.title}>PitWall</span>
         <span style={styles.tagline}>Your AI Race Strategist</span>
       </div>
-      {selected
-        ? <StrategyForm session={selected} onBack={() => setSelected(null)} />
-        : <SessionList onSelect={setSelected} />}
+      {!selected && <SessionList onSelect={setSelected} />}
+      {selected && !showDrivers && !selectedDriver && (
+        <RaceInfo
+          session={selected}
+          onViewDrivers={() => setShowDrivers(true)}
+          onBack={() => setSelected(null)}
+        />
+      )}
+      {selected && showDrivers && !selectedDriver && (
+        <DriverList
+          session={selected}
+          onSelectDriver={setSelectedDriver}
+          onBack={() => setShowDrivers(false)}
+        />
+      )}
+      {selected && selectedDriver && (
+        <StrategyForm
+          session={selected}
+          driver={selectedDriver}
+          onBack={() => setSelectedDriver(null)}
+        />
+      )}
     </div>
   );
 }
@@ -211,12 +383,12 @@ const styles = {
   field: { display: "flex", flexDirection: "column", gap: 6 },
   label: { color: "#888", fontSize: 12 },
   input: { background: "#1a1a1a", border: "1px solid #333", color: "#fff", padding: "10px 12px", borderRadius: 8, fontSize: 14 },
-  tireRow: { display: "flex", gap: 8, marginBottom: 24, flexWrap: "wrap" },
+  tireRow: { display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" },
+  weatherRow: { display: "flex", gap: 8, marginBottom: 24, flexWrap: "wrap" },
   tire: { padding: "8px 16px", borderRadius: 8, border: "1px solid", cursor: "pointer", fontWeight: 600, fontSize: 13 },
   btn: { width: "100%", background: "#e8002d", color: "#fff", border: "none", padding: "14px", borderRadius: 12, fontSize: 16, fontWeight: 700, cursor: "pointer", marginBottom: 24 },
   result: { background: "#111", border: "1px solid #e8002d44", borderRadius: 12, padding: 20 },
   resultHeader: { display: "flex", alignItems: "center", gap: 8, marginBottom: 12 },
   resultTitle: { color: "#e8002d", fontWeight: 700, fontSize: 13, letterSpacing: 1 },
   resultText: { color: "#fff", fontFamily: "monospace", fontSize: 14, lineHeight: 1.6, whiteSpace: "pre-wrap", margin: 0 },
-  weatherRow: { display: "flex", gap: 8, marginBottom: 24, flexWrap: "wrap" },
 };
