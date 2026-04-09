@@ -57,9 +57,14 @@ struct StrategyView: View {
                     HStack {
                         Image(systemName: "flag.checkered")
                             .foregroundColor(.red)
-                        Text(session.circuitShortName)
-                            .font(.title2.bold())
-                            .foregroundColor(.white)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(session.circuitShortName)
+                                .font(.title2.bold())
+                                .foregroundColor(.white)
+                            Text("\(driverName) #\(driverNumber)")
+                                .font(.caption)
+                                .foregroundColor(.gray)
+                        }
                         Spacer()
                         Text(session.countryName)
                             .font(.caption)

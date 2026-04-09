@@ -14,9 +14,14 @@ struct ContentView: View {
                         Image(systemName: "flag.checkered")
                             .foregroundColor(.red)
                             .font(.system(size: 24))
-                        Text("PitWall")
-                            .font(.system(size: 28, weight: .bold))
-                            .foregroundColor(.white)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("PitWall")
+                                .font(.system(size: 28, weight: .bold))
+                                .foregroundColor(.white)
+                            Text("Your AI Race Strategist")
+                                .font(.caption)
+                                .foregroundColor(.gray)
+                        }
                         Spacer()
                     }
                     .padding()

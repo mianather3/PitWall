@@ -75,7 +75,9 @@ struct DriverDashboardView: View {
         .navigationTitle("Driver Standings")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(item: $selectedDriver) { driver in
-            StrategyView(session: session, prefilledDriver: driver)
+            NavigationView {
+                StrategyView(session: session, prefilledDriver: driver)
+            }
         }
         .task {
             await fetchDrivers()
@@ -112,11 +114,6 @@ struct DriverCard: View {
     
     var body: some View {
         HStack(spacing: 16) {
-            // Position
-            Text(driver.position.map { "P\($0)" } ?? "--")
-                .font(.system(size: 14, weight: .bold))
-                .foregroundColor(.white)
-                .frame(width: 36)
             
             // Team color bar
             RoundedRectangle(cornerRadius: 2)
