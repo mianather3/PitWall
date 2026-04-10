@@ -78,12 +78,12 @@ struct StrategyView: View {
                     Group {
                         inputField("Driver Name", text: $driverName)
                         inputField("Driver Number", text: $driverNumber)
-                        stepperField("Current Lap", value: $currentLap, range: 1...100)
-                        stepperField("Total Laps", value: $totalLaps, range: 1...100)
                         inputField("Position", text: $position)
                         inputField("Tire Age (laps)", text: $tireAge)
                         inputField("Gap Ahead (sec)", text: $gapAhead)
                         inputField("Gap Behind (sec)", text: $gapBehind)
+                        stepperField("Current Lap", value: $currentLap, range: 1...100)
+                        stepperField("Total Laps", value: $totalLaps, range: 1...100)
                     }
                     
                     // Weather selector
