@@ -29,7 +29,7 @@ function SessionList({ onSelect }) {
         (s, i, arr) =>
           s.session_type === "Race" &&
           arr.findIndex((x) => x.circuit_short_name === s.circuit_short_name) === i
-      );
+      ).sort((a, b) => new Date(a.date_start) - new Date(b.date_start));
       setSessions(unique);
       setLoading(false);
     });
@@ -44,7 +44,7 @@ function SessionList({ onSelect }) {
 
   return (
     <div>
-      <p style={styles.subtitle}>2025 Race Calendar — Select a race to view drivers</p>
+      <p style={styles.subtitle}>2025 Race Calendar — Select a race for circuit info</p>
       <div style={styles.grid}>
         {sessions.map((s) => (
           <div key={s.session_key} style={styles.card} onClick={() => onSelect(s)}
@@ -261,8 +261,6 @@ function StrategyForm({ session, driver, onBack }) {
         {[
           ["Driver Name", "driverName", "text"],
           ["Driver Number", "driverNumber", "number"],
-          ["Current Lap", "currentLap", "number"],
-          ["Total Laps", "totalLaps", "number"],
           ["Position", "position", "number"],
           ["Tire Age (laps)", "tireAge", "number"],
           ["Gap Ahead (sec)", "gapAhead", "number"],
@@ -275,6 +273,21 @@ function StrategyForm({ session, driver, onBack }) {
           </div>
         ))}
       </div>
+
+<div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
+  {[["Current Lap", "currentLap"], ["Total Laps", "totalLaps"]].map(([label, key]) => (
+    <div key={key} style={styles.field}>
+      <label style={styles.label}>{label}</label>
+      <div style={{ display: "flex", alignItems: "center", background: "#1a1a1a", borderRadius: 8, border: "1px solid #333" }}>
+        <button onClick={() => set(key, Math.max(1, Number(form[key]) - 1))}
+          style={{ background: "none", border: "none", color: "#e8002d", fontSize: 20, padding: "8px 14px", cursor: "pointer", fontWeight: 700 }}>−</button>
+        <span style={{ flex: 1, textAlign: "center", color: "#fff", fontWeight: 700, fontSize: 16 }}>{form[key]}</span>
+        <button onClick={() => set(key, Math.min(100, Number(form[key]) + 1))}
+          style={{ background: "none", border: "none", color: "#e8002d", fontSize: 20, padding: "8px 14px", cursor: "pointer", fontWeight: 700 }}>+</button>
+      </div>
+    </div>
+  ))}
+</div>
 
       <div style={styles.tireRow}>
         {["Soft", "Medium", "Hard", "Intermediate", "Wet"].map((t) => (
