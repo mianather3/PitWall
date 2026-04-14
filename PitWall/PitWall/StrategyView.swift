@@ -54,25 +54,37 @@ struct StrategyView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     
                     // Circuit header
-                    HStack {
-                        Image(systemName: "flag.checkered")
-                            .foregroundColor(.red)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(session.circuitShortName)
-                                .font(.title2.bold())
-                                .foregroundColor(.white)
-                            Text("\(driverName) #\(driverNumber)")
-                                .font(.caption)
-                                .foregroundColor(.gray)
+                    ZStack(alignment: .bottomLeading) {
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(LinearGradient(
+                                colors: [Color.red.opacity(0.25), Color.black],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ))
+                            .frame(height: 100)
+                        
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(session.circuitShortName)
+                                    .font(.system(size: 20, weight: .bold))
+                                    .foregroundColor(.white)
+                                Text("\(driverName) · #\(driverNumber)")
+                                    .font(.caption)
+                                    .foregroundColor(.gray)
+                            }
+                            Spacer()
+                            VStack(alignment: .trailing, spacing: 4) {
+                                Text(session.countryName)
+                                    .font(.caption)
+                                    .foregroundColor(.gray)
+                                Text("STRATEGY")
+                                    .font(.system(size: 10, weight: .bold))
+                                    .foregroundColor(.red)
+                                    .tracking(1)
+                            }
                         }
-                        Spacer()
-                        Text(session.countryName)
-                            .font(.caption)
-                            .foregroundColor(.gray)
+                        .padding()
                     }
-                    .padding()
-                    .background(Color(white: 0.1))
-                    .cornerRadius(12)
                     
                     // Input fields
                     Group {
@@ -114,43 +126,69 @@ struct StrategyView: View {
                     
                     // Analyze button
                     Button(action: fetchStrategy) {
-                        HStack {
+                        HStack(spacing: 10) {
                             if isLoading {
                                 ProgressView().tint(.white)
+                                Text("Analyzing race data...")
+                                    .font(.system(size: 16, weight: .bold))
+                                    .foregroundColor(.white)
                             } else {
                                 Image(systemName: "brain.head.profile")
+                                    .font(.system(size: 18))
+                                Text("Get AI Strategy")
+                                    .font(.system(size: 16, weight: .bold))
                             }
-                            Text(isLoading ? "Analyzing..." : "Get AI Strategy")
-                                .font(.headline)
                         }
                         .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.red)
+                        .padding(.vertical, 16)
+                        .background(
+                            isLoading ?
+                            LinearGradient(colors: [Color.gray, Color.gray.opacity(0.7)], startPoint: .leading, endPoint: .trailing) :
+                            LinearGradient(colors: [Color.red, Color(red: 0.8, green: 0, blue: 0)], startPoint: .leading, endPoint: .trailing)
+                        )
                         .foregroundColor(.white)
-                        .cornerRadius(12)
+                        .cornerRadius(14)
+                        .shadow(color: Color.red.opacity(0.4), radius: 8, x: 0, y: 4)
                     }
                     .disabled(isLoading)
                     
                     // Strategy result
                     if !strategyResult.isEmpty {
-                        VStack(alignment: .leading, spacing: 8) {
+                        VStack(alignment: .leading, spacing: 12) {
                             HStack {
                                 Image(systemName: "antenna.radiowaves.left.and.right")
                                     .foregroundColor(.red)
                                 Text("STRATEGY CALL")
-                                    .font(.caption.bold())
+                                    .font(.system(size: 11, weight: .bold))
                                     .foregroundColor(.red)
+                                    .tracking(2)
+                                Spacer()
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundColor(.green)
+                                    .font(.system(size: 16))
                             }
+                            Divider()
+                                .background(Color.red.opacity(0.3))
                             Text(strategyResult)
                                 .foregroundColor(.white)
-                                .font(.system(.body, design: .monospaced))
+                                .font(.system(size: 14, design: .monospaced))
+                                .lineSpacing(4)
                         }
                         .padding()
-                        .background(Color(white: 0.1))
-                        .cornerRadius(12)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.red.opacity(0.5), lineWidth: 1)
+                        .background(
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(Color(white: 0.08))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .stroke(
+                                            LinearGradient(
+                                                colors: [Color.red.opacity(0.6), Color.red.opacity(0.1)],
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
+                                            ),
+                                            lineWidth: 1
+                                        )
+                                )
                         )
                     }
                 }

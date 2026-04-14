@@ -32,18 +32,22 @@ struct DriverDashboardView: View {
             VStack(spacing: 0) {
                 // Header
                 HStack {
-                    Image(systemName: "flag.checkered")
-                        .foregroundColor(.red)
-                    Text(session.circuitShortName)
-                        .font(.headline)
-                        .foregroundColor(.white)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(session.circuitShortName)
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundColor(.white)
+                        Text(session.countryName)
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                    }
                     Spacer()
-                    Text(session.countryName)
-                        .font(.caption)
-                        .foregroundColor(.gray)
+                    Text("DRIVER STANDINGS")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundColor(.red)
+                        .tracking(1)
                 }
                 .padding()
-                .background(Color(white: 0.1))
+                .background(Color(white: 0.08))
                 
                 if isLoading {
                     Spacer()

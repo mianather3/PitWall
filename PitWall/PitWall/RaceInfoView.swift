@@ -51,26 +51,31 @@ struct RaceInfoView: View {
                 VStack(spacing: 16) {
 
                     // Header
-                    HStack {
-                        Image(systemName: "flag.checkered")
-                            .foregroundColor(.red)
-                            .font(.system(size: 28))
-                        VStack(alignment: .leading) {
+                    ZStack(alignment: .bottomLeading) {
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(LinearGradient(
+                                colors: [Color.red.opacity(0.3), Color.black],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ))
+                            .frame(height: 120)
+                        
+                        VStack(alignment: .leading, spacing: 4) {
                             Text(session.circuitShortName)
-                                .font(.title2.bold())
+                                .font(.system(size: 24, weight: .bold))
                                 .foregroundColor(.white)
-                            Text(session.countryName)
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
+                            HStack {
+                                Text(session.countryName)
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
+                                Spacer()
+                                Text(session.dateStart.prefix(10))
+                                    .font(.caption.bold())
+                                    .foregroundColor(.red)
+                            }
                         }
-                        Spacer()
-                        Text(session.dateStart.prefix(10))
-                            .font(.caption)
-                            .foregroundColor(.red)
+                        .padding()
                     }
-                    .padding()
-                    .background(Color(white: 0.1))
-                    .cornerRadius(12)
 
                     if let info = circuitInfo {
                         // Stats grid

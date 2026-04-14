@@ -20,7 +20,10 @@ class RaceViewModel: ObservableObject {
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
             let decoded = try JSONDecoder().decode([RaceSession].self, from: data)
-            sessions = decoded.sorted { $0.dateStart > $1.dateStart }
+            let unique = Dictionary(grouping: decoded, by: { $0.circuitShortName })
+                .compactMap { $0.value.first }
+                .sorted { $0.dateStart < $1.dateStart }
+            sessions = unique
         } catch {
             errorMessage = "Failed to load sessions: \(error.localizedDescription)"
         }
