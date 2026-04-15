@@ -17,40 +17,54 @@ let weatherConditions = [
 
 struct WeatherSelector: View {
     @Binding var selected: String
-    
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Track Conditions")
-                .font(.caption)
+        VStack(alignment: .leading, spacing: 10) {
+            Text("TRACK CONDITIONS")
+                .font(.system(size: 11, weight: .bold))
                 .foregroundColor(.gray)
-            
+                .tracking(1)
+                .padding(.horizontal, 4)
+
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 10) {
                     ForEach(weatherConditions, id: \.name) { condition in
                         Button(action: { selected = condition.name }) {
-                            VStack(spacing: 6) {
+                            VStack(spacing: 8) {
                                 Image(systemName: condition.icon)
-                                    .font(.system(size: 22))
-                                    .foregroundColor(selected == condition.name ? condition.color : .gray)
+                                    .font(.system(size: 24))
+                                    .foregroundColor(selected == condition.name ? condition.color : Color(white: 0.5))
+                                    .frame(width: 48, height: 48)
+                                    .background(
+                                        selected == condition.name ?
+                                        condition.color.opacity(0.15) :
+                                        Color(white: 0.1)
+                                    )
+                                    .cornerRadius(14)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 14)
+                                            .stroke(
+                                                selected == condition.name ? condition.color : Color.clear,
+                                                lineWidth: 1.5
+                                            )
+                                    )
                                 Text(condition.name)
-                                    .font(.caption2)
-                                    .foregroundColor(selected == condition.name ? .white : .gray)
+                                    .font(.system(size: 10, weight: selected == condition.name ? .bold : .regular))
+                                    .foregroundColor(selected == condition.name ? .white : Color(white: 0.5))
                             }
-                            .frame(width: 70, height: 70)
-                            .background(selected == condition.name ? Color(white: 0.2) : Color(white: 0.1))
-                            .cornerRadius(12)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(selected == condition.name ? condition.color : Color.clear, lineWidth: 1.5)
-                            )
+                            .frame(width: 70)
                         }
                     }
                 }
-                .padding(.horizontal, 2)
+                .padding(.horizontal, 4)
             }
         }
         .padding()
-        .background(Color(white: 0.1))
-        .cornerRadius(12)
+        .background(Color(white: 0.06))
+        .cornerRadius(16)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color(white: 0.12), lineWidth: 1)
+        )
     }
 }

@@ -143,20 +143,28 @@ struct RaceInfoView: View {
     }
 
     func statCard(title: String, value: String, icon: String) -> some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 10) {
             Image(systemName: icon)
                 .foregroundColor(.red)
-                .font(.system(size: 22))
+                .font(.system(size: 24))
+                .frame(width: 44, height: 44)
+                .background(Color.red.opacity(0.1))
+                .cornerRadius(12)
             Text(value)
-                .font(.system(size: 18, weight: .bold))
+                .font(.system(size: 20, weight: .bold))
                 .foregroundColor(.white)
             Text(title)
-                .font(.caption)
+                .font(.system(size: 11))
                 .foregroundColor(.gray)
+                .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
-        .padding()
-        .background(Color(white: 0.1))
-        .cornerRadius(12)
+        .padding(.vertical, 20)
+        .background(Color(white: 0.08))
+        .cornerRadius(16)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color(white: 0.15), lineWidth: 1)
+        )
     }
 }

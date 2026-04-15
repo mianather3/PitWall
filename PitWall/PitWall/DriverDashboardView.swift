@@ -117,20 +117,33 @@ struct DriverCard: View {
     }
     
     var body: some View {
-        HStack(spacing: 16) {
-            
+        HStack(spacing: 14) {
             // Team color bar
-            RoundedRectangle(cornerRadius: 2)
-                .fill(teamColor)
-                .frame(width: 4, height: 44)
+            RoundedRectangle(cornerRadius: 3)
+                .fill(
+                    LinearGradient(
+                        colors: [teamColor, teamColor.opacity(0.3)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .frame(width: 4, height: 50)
+            
+            // Driver acronym badge
+            Text(driver.nameAcronym)
+                .font(.system(size: 12, weight: .black))
+                .foregroundColor(teamColor)
+                .frame(width: 44, height: 44)
+                .background(teamColor.opacity(0.12))
+                .cornerRadius(10)
             
             // Driver info
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 3) {
                 Text(driver.fullName)
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundColor(.white)
                 Text(driver.teamName)
-                    .font(.caption)
+                    .font(.system(size: 12))
                     .foregroundColor(.gray)
             }
             
@@ -138,20 +151,22 @@ struct DriverCard: View {
             
             // Number
             Text("#\(driver.driverNumber)")
-                .font(.system(size: 13, weight: .bold))
+                .font(.system(size: 14, weight: .bold))
                 .foregroundColor(teamColor)
             
             Image(systemName: "chevron.right")
-                .foregroundColor(.gray)
-                .font(.caption)
+                .foregroundColor(Color(white: 0.4))
+                .font(.system(size: 11))
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .background(Color(white: 0.1))
-        .cornerRadius(12)
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(teamColor.opacity(0.3), lineWidth: 1)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .background(
+            RoundedRectangle(cornerRadius: 14)
+                .fill(Color(white: 0.08))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14)
+                        .stroke(teamColor.opacity(0.25), lineWidth: 1)
+                )
         )
     }
 }
