@@ -70,6 +70,60 @@ app.MapPost("/api/strategy", async (StrategyRequest request) =>
     return Results.Ok(new { strategy, generatedAt = DateTime.UtcNow });
 });
 
+// Get live race data for a session (drivers, positions, laps, intervals)
+app.MapGet("/api/live/{sessionKey}", async (int sessionKey, IHttpClientFactory factory) =>
+{
+    var client = factory.CreateClient();
+
+    async Task<System.Text.Json.JsonElement> FetchSafe(string url)
+    {
+        try
+        {
+            await Task.Delay(200); // stagger requests to avoid rate limiting
+            var response = await client.GetStringAsync(url);
+            return System.Text.Json.JsonDocument.Parse(response).RootElement;
+        }
+        catch
+        {
+            return System.Text.Json.JsonDocument.Parse("[]").RootElement;
+        }
+    }
+
+    var drivers   = await FetchSafe($"https://api.openf1.org/v1/drivers?session_key={sessionKey}");
+    var positions = await FetchSafe($"https://api.openf1.org/v1/position?session_key={sessionKey}");
+    var laps      = await FetchSafe($"https://api.openf1.org/v1/laps?session_key={sessionKey}");
+    var intervals = await FetchSafe($"https://api.openf1.org/v1/intervals?session_key={sessionKey}");
+    var stints    = await FetchSafe($"https://api.openf1.org/v1/stints?session_key={sessionKey}");
+
+    return Results.Ok(new
+    {
+        sessionKey,
+        fetchedAt = DateTime.UtcNow,
+        drivers,
+        positions,
+        laps,
+        intervals,
+        stints
+    });
+});
+
+// Get latest session key (most recent race)
+app.MapGet("/api/latest-session", async (IHttpClientFactory factory) =>
+{
+    var client = factory.CreateClient();
+    var response = await client.GetStringAsync(
+        "https://api.openf1.org/v1/sessions?session_type=Race&year=2025");
+    var sessions = System.Text.Json.JsonDocument.Parse(response).RootElement;
+    var last = sessions[sessions.GetArrayLength() - 1];
+    return Results.Ok(new
+    {
+        sessionKey = last.GetProperty("session_key").GetInt32(),
+        circuitShortName = last.GetProperty("circuit_short_name").GetString(),
+        countryName = last.GetProperty("country_name").GetString(),
+        dateStart = last.GetProperty("date_start").GetString()
+    });
+});
+
 app.Run();
 
 record StrategyRequest(
