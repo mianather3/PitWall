@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { supabase } from "./supabase";
+import Auth from "./Auth";
 
 const API = "https://pitwallapi.azurewebsites.net";
 
@@ -336,16 +338,51 @@ function StrategyForm({ session, driver, onBack }) {
 }
 
 export default function App() {
+  const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const [selected, setSelected] = useState(null);
   const [showDrivers, setShowDrivers] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState(null);
 
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setAuthLoading(false);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const signOut = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setSelected(null);
+    setShowDrivers(false);
+    setSelectedDriver(null);
+  };
+
+  if (authLoading) return (
+    <div style={{ minHeight: "100vh", background: "#0a0a0a", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ width: 32, height: 32, border: "3px solid #222", borderTop: "3px solid #e8002d", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
+    </div>
+  );
+
+  if (!user) return <Auth onLogin={setUser} />;
+
   return (
     <div style={styles.app}>
       <div style={styles.header}>
-        <span style={{ fontSize: 32 }}>🏁</span>
+        <span style={{ fontSize: 32 }}>🏎</span>
         <span style={styles.title}>PitWall</span>
         <span style={styles.tagline}>Your AI Race Strategist</span>
+        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
+          <span style={{ color: "#666", fontSize: 13 }}>{user.email}</span>
+          <button onClick={signOut} style={{ background: "none", border: "1px solid #333", color: "#888", padding: "6px 14px", borderRadius: 8, cursor: "pointer", fontSize: 13 }}>
+            Sign Out
+          </button>
+        </div>
       </div>
       {!selected && <SessionList onSelect={setSelected} />}
       {selected && !showDrivers && !selectedDriver && (
