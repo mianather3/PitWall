@@ -8,7 +8,7 @@ struct Driver: Codable, Identifiable {
     let teamName: String
     let teamColour: String?
     let position: Int?
-    
+
     enum CodingKeys: String, CodingKey {
         case driverNumber = "driver_number"
         case fullName = "full_name"
@@ -24,31 +24,49 @@ struct DriverDashboardView: View {
     @State private var drivers: [Driver] = []
     @State private var isLoading = false
     @State private var selectedDriver: Driver?
-    
+
+    var countryFlag: String {
+        let flags: [String: String] = [
+            "Australia": "🇦🇺", "China": "🇨🇳", "Japan": "🇯🇵",
+            "Bahrain": "🇧🇭", "Saudi Arabia": "🇸🇦", "United States": "🇺🇸",
+            "Italy": "🇮🇹", "Monaco": "🇲🇨", "Spain": "🇪🇸",
+            "Canada": "🇨🇦", "Austria": "🇦🇹", "United Kingdom": "🇬🇧",
+            "Belgium": "🇧🇪", "Hungary": "🇭🇺", "Netherlands": "🇳🇱",
+            "Azerbaijan": "🇦🇿", "Singapore": "🇸🇬", "Mexico": "🇲🇽",
+            "Brazil": "🇧🇷", "United Arab Emirates": "🇦🇪", "Qatar": "🇶🇦"
+        ]
+        return flags[session.countryName] ?? "🏁"
+    }
+
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
-            
             VStack(spacing: 0) {
+
                 // Header
-                HStack {
-                    VStack(alignment: .leading, spacing: 2) {
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 3) {
                         Text(session.circuitShortName)
-                            .font(.system(size: 20, weight: .bold))
+                            .font(.system(size: 22, weight: .heavy))
                             .foregroundColor(.white)
-                        Text(session.countryName)
-                            .font(.caption)
-                            .foregroundColor(.gray)
+                        HStack(spacing: 5) {
+                            Text(countryFlag)
+                                .font(.system(size: 13))
+                            Text(session.countryName)
+                                .font(.system(size: 13))
+                                .foregroundColor(Color(white: 0.45))
+                        }
                     }
                     Spacer()
                     Text("DRIVER STANDINGS")
                         .font(.system(size: 10, weight: .bold))
                         .foregroundColor(.red)
                         .tracking(1)
+                        .padding(.top, 4)
                 }
-                .padding()
-                .background(Color(white: 0.08))
-                
+                .padding(.horizontal, 16)
+                .padding(.vertical, 16)
+
                 if isLoading {
                     Spacer()
                     ProgressView().tint(.red)
@@ -66,12 +84,11 @@ struct DriverDashboardView: View {
                         LazyVStack(spacing: 8) {
                             ForEach(drivers) { driver in
                                 DriverCard(driver: driver)
-                                    .onTapGesture {
-                                        selectedDriver = driver
-                                    }
+                                    .onTapGesture { selectedDriver = driver }
                             }
                         }
-                        .padding()
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
                     }
                 }
             }
@@ -83,11 +100,9 @@ struct DriverDashboardView: View {
                 StrategyView(session: session, prefilledDriver: driver)
             }
         }
-        .task {
-            await fetchDrivers()
-        }
+        .task { await fetchDrivers() }
     }
-    
+
     func fetchDrivers() async {
         isLoading = true
         guard let url = URL(string: "https://api.openf1.org/v1/drivers?session_key=\(session.sessionKey)") else {
@@ -99,7 +114,7 @@ struct DriverDashboardView: View {
             let decoded = try JSONDecoder().decode([Driver].self, from: data)
             let unique = Dictionary(grouping: decoded, by: { $0.driverNumber })
                 .compactMap { $0.value.first }
-                .sorted { ($0.position ?? 99) < ($1.position ?? 99) }
+                .sorted { ($0.driverNumber) < ($1.driverNumber) }
             drivers = unique
         } catch {
             print("Driver fetch error: \(error)")
@@ -110,63 +125,60 @@ struct DriverDashboardView: View {
 
 struct DriverCard: View {
     let driver: Driver
-    
+
     var teamColor: Color {
         guard let hex = driver.teamColour else { return .gray }
         return Color(hex: hex) ?? .gray
     }
-    
+
     var body: some View {
         HStack(spacing: 14) {
             // Team color bar
-            RoundedRectangle(cornerRadius: 3)
-                .fill(
-                    LinearGradient(
-                        colors: [teamColor, teamColor.opacity(0.3)],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
-                .frame(width: 4, height: 50)
-            
-            // Driver acronym badge
+            RoundedRectangle(cornerRadius: 2)
+                .fill(teamColor)
+                .frame(width: 4, height: 48)
+
+            // Acronym badge
             Text(driver.nameAcronym)
                 .font(.system(size: 12, weight: .black))
                 .foregroundColor(teamColor)
-                .frame(width: 44, height: 44)
-                .background(teamColor.opacity(0.12))
-                .cornerRadius(10)
-            
+                .frame(width: 44, height: 36)
+                .background(teamColor.opacity(0.13))
+                .cornerRadius(8)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(teamColor.opacity(0.3), lineWidth: 1)
+                )
+
             // Driver info
             VStack(alignment: .leading, spacing: 3) {
-                Text(driver.fullName)
+                Text(driver.fullName.split(separator: " ").map { word in
+                    word == word.uppercased() ? word.capitalized : String(word)
+                }.joined(separator: " "))
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundColor(.white)
                 Text(driver.teamName)
                     .font(.system(size: 12))
-                    .foregroundColor(.gray)
+                    .foregroundColor(Color(white: 0.4))
             }
-            
+
             Spacer()
-            
-            // Number
+
             Text("#\(driver.driverNumber)")
                 .font(.system(size: 14, weight: .bold))
                 .foregroundColor(teamColor)
-            
+
             Image(systemName: "chevron.right")
-                .foregroundColor(Color(white: 0.4))
+                .foregroundColor(Color(white: 0.3))
                 .font(.system(size: 11))
         }
         .padding(.horizontal, 14)
-        .padding(.vertical, 10)
-        .background(
-            RoundedRectangle(cornerRadius: 14)
-                .fill(Color(white: 0.08))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 14)
-                        .stroke(teamColor.opacity(0.25), lineWidth: 1)
-                )
+        .padding(.vertical, 12)
+        .background(Color(white: 0.07))
+        .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color(white: 0.12), lineWidth: 1)
         )
     }
 }

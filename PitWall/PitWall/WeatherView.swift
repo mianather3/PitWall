@@ -2,17 +2,16 @@ import SwiftUI
 
 struct WeatherCondition {
     let name: String
-    let icon: String
-    let description: String
+    let emoji: String
     let color: Color
 }
 
 let weatherConditions = [
-    WeatherCondition(name: "Dry", icon: "sun.max.fill", description: "Track is dry", color: .yellow),
-    WeatherCondition(name: "Cloudy", icon: "cloud.fill", description: "Overcast, no rain", color: .gray),
-    WeatherCondition(name: "Light Rain", icon: "cloud.drizzle.fill", description: "Light drizzle", color: .blue),
-    WeatherCondition(name: "Heavy Rain", icon: "cloud.heavyrain.fill", description: "Heavy rain", color: .indigo),
-    WeatherCondition(name: "Safety Car", icon: "car.fill", description: "Safety car deployed", color: .orange),
+    WeatherCondition(name: "Dry", emoji: "☀️", color: .yellow),
+    WeatherCondition(name: "Cloudy", emoji: "☁️", color: .gray),
+    WeatherCondition(name: "Light Rain", emoji: "🌦️", color: .blue),
+    WeatherCondition(name: "Heavy Rain", emoji: "🌧️", color: .indigo),
+    WeatherCondition(name: "Safety Car", emoji: "🚗", color: .orange),
 ]
 
 struct WeatherSelector: View {
@@ -22,44 +21,43 @@ struct WeatherSelector: View {
         VStack(alignment: .leading, spacing: 10) {
             Text("TRACK CONDITIONS")
                 .font(.system(size: 11, weight: .bold))
-                .foregroundColor(.gray)
-                .tracking(1)
+                .foregroundColor(Color(white: 0.4))
+                .tracking(0.5)
                 .padding(.horizontal, 4)
 
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 10) {
-                    ForEach(weatherConditions, id: \.name) { condition in
-                        Button(action: { selected = condition.name }) {
-                            VStack(spacing: 8) {
-                                Image(systemName: condition.icon)
-                                    .font(.system(size: 24))
-                                    .foregroundColor(selected == condition.name ? condition.color : Color(white: 0.5))
-                                    .frame(width: 48, height: 48)
-                                    .background(
-                                        selected == condition.name ?
-                                        condition.color.opacity(0.15) :
-                                        Color(white: 0.1)
-                                    )
-                                    .cornerRadius(14)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 14)
-                                            .stroke(
-                                                selected == condition.name ? condition.color : Color.clear,
-                                                lineWidth: 1.5
-                                            )
-                                    )
-                                Text(condition.name)
-                                    .font(.system(size: 10, weight: selected == condition.name ? .bold : .regular))
-                                    .foregroundColor(selected == condition.name ? .white : Color(white: 0.5))
-                            }
-                            .frame(width: 70)
+            HStack(spacing: 8) {
+                ForEach(weatherConditions, id: \.name) { condition in
+                    Button(action: { selected = condition.name }) {
+                        VStack(spacing: 6) {
+                            Text(condition.emoji)
+                                .font(.system(size: 22))
+                                .frame(width: 48, height: 48)
+                                .background(
+                                    selected == condition.name
+                                    ? Color(red: 0.12, green: 0.23, blue: 0.37)
+                                    : Color(white: 0.1)
+                                )
+                                .cornerRadius(12)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(
+                                            selected == condition.name ? Color(red: 0.29, green: 0.62, blue: 1) : Color.clear,
+                                            lineWidth: 1.5
+                                        )
+                                )
+                            Text(condition.name)
+                                .font(.system(size: 10, weight: selected == condition.name ? .bold : .regular))
+                                .foregroundColor(selected == condition.name ? .white : Color(white: 0.5))
+                                .multilineTextAlignment(.center)
+                                .lineLimit(2)
+                                .fixedSize(horizontal: false, vertical: true)
                         }
+                        .frame(maxWidth: .infinity)
                     }
                 }
-                .padding(.horizontal, 4)
             }
         }
-        .padding()
+        .padding(16)
         .background(Color(white: 0.06))
         .cornerRadius(16)
         .overlay(
