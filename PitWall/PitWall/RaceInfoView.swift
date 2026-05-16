@@ -106,17 +106,15 @@ struct RaceInfoView: View {
                     if let info = circuitInfo {
                         // Stats grid
                         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                            statCard(icon: "🔄", label: "Laps", value: "\(info.laps)")
-                            statCard(icon: "📏", label: "Circuit Length", value: info.circuitLength)
+                            statCard(icon: "🏁", label: "Laps", value: "\(info.laps)")
+                            statCard(icon: "📐", label: "Circuit Length", value: info.circuitLength)
                             statCard(icon: "⚡", label: "DRS Zones", value: "\(info.drsZones)")
-                            statCard(icon: "📅", label: "First GP", value: "\(info.firstGP)")
+                            statCard(icon: "🏆", label: "First GP", value: "\(info.firstGP)")
                         }
 
                         // Lap record card
                         VStack(alignment: .leading, spacing: 10) {
                             HStack(spacing: 6) {
-                                Text("⏱")
-                                    .font(.system(size: 13))
                                 Text("LAP RECORD")
                                     .font(.system(size: 11, weight: .bold))
                                     .foregroundColor(.red)
@@ -152,7 +150,6 @@ struct RaceInfoView: View {
                     // View Driver Standings button
                     NavigationLink(destination: DriverDashboardView(session: session)) {
                         HStack {
-                            Text("👥")
                             Text("View Driver Standings")
                                 .font(.system(size: 15, weight: .bold))
                         }

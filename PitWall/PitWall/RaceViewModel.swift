@@ -20,7 +20,7 @@ class RaceViewModel: ObservableObject {
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
             let decoded = try JSONDecoder().decode([RaceSession].self, from: data)
-            let unique = Dictionary(grouping: decoded, by: { $0.circuitShortName })
+            let unique = Dictionary(grouping: decoded.filter { $0.sessionName == "Race" }, by: { $0.circuitShortName })
                 .compactMap { $0.value.first }
                 .sorted { $0.dateStart < $1.dateStart }
             sessions = unique

@@ -119,9 +119,11 @@ function SessionList({ onSelect }) {
 
   useEffect(() => {
     axios.get(`${API}/api/session`).then(res => {
+      const seen = new Set();
       const unique = res.data
-        .filter((s,i,arr) => s.session_name==="Race" && arr.findIndex(x=>x.circuit_short_name===s.circuit_short_name)===i)
-        .sort((a,b) => new Date(a.date_start)-new Date(b.date_start));
+        .filter(s => s.session_name==="Race")
+        .sort((a,b) => new Date(a.date_start)-new Date(b.date_start))
+        .filter(s => seen.has(s.circuit_short_name) ? false : seen.add(s.circuit_short_name));
       setSessions(unique); setLoading(false);
     });
   }, []);
@@ -129,8 +131,10 @@ function SessionList({ onSelect }) {
   if (loading) return <div style={s.center}><div style={s.spinner}/><p style={{color:"#888",marginTop:16,fontSize:14}}>Loading race calendar...</p></div>;
 
   const formatDate = dateStr => {
-    const d = new Date(dateStr);
-    return { month: d.toLocaleString("en",{month:"short"}).toUpperCase(), day: String(d.getDate()).padStart(2,"0") };
+    const d = dateStr.slice(0, 10);
+    const [, month, day] = d.split("-");
+    const monthName = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"][parseInt(month)-1];
+    return { month: monthName, day: day };
   };
 
   return (
@@ -180,8 +184,10 @@ function RaceInfo({ session, onViewDrivers, onBack }) {
       {info ? (
         <>
           <div style={s.statsGrid}>
-            {[{icon:"🔄",label:"Laps",value:info.laps},{icon:"📏",label:"Circuit Length",value:info.length},
-              {icon:"⚡",label:"DRS Zones",value:info.drs},{icon:"📅",label:"First GP",value:info.firstGP}].map(stat => (
+            {[{ icon: "🏁", label: "Laps", value: info.laps },
+              { icon: "📐", label: "Circuit Length", value: info.length },
+              { icon: "⚡", label: "DRS Zones", value: info.drs },
+              { icon: "🏆", label: "First GP", value: info.firstGP }].map(stat => (
               <div key={stat.label} style={s.statCard}>
                 <div style={{fontSize:22,marginBottom:8}}>{stat.icon}</div>
                 <div style={{color:"#fff",fontWeight:700,fontSize:20}}>{stat.value}</div>
@@ -190,7 +196,7 @@ function RaceInfo({ session, onViewDrivers, onBack }) {
             ))}
           </div>
           <div style={s.lapRecord}>
-            <div style={{color:"#e8002d",fontWeight:700,fontSize:11,letterSpacing:1.5,marginBottom:10}}>⏱ LAP RECORD</div>
+            <div style={{color:"#e8002d",fontWeight:700,fontSize:11,letterSpacing:1.5,marginBottom:10}}>LAP RECORD</div>
             <div style={{color:"#fff",fontFamily:"'Courier New',monospace",fontSize:40,fontWeight:700,letterSpacing:2}}>{info.lapRecord}</div>
             <div style={{display:"flex",justifyContent:"space-between",marginTop:10}}>
               <span style={{color:"#888",fontSize:13}}>{info.holder}</span>
@@ -199,7 +205,7 @@ function RaceInfo({ session, onViewDrivers, onBack }) {
           </div>
         </>
       ) : <p style={{color:"#888"}}>Circuit data not available</p>}
-      <button style={s.redBtn} onClick={onViewDrivers}>👥 View Driver Standings</button>
+      <button style={s.redBtn} onClick={onViewDrivers}>View Driver Standings</button>
     </div>
   );
 }
@@ -300,7 +306,7 @@ function StrategyForm({ session, driver, user, onBack }) {
   return (
     <div style={s.screen}>
       <button style={s.back} onClick={onBack}>← Back</button>
-      <div style={{...s.gradientHeader,borderLeft:`4px solid ${teamColor}`}}>
+      <div style={{...s.gradientHeader}}>
         <div style={{flex:1}}>
           <div style={{fontSize:11,color:"#e8002d",fontWeight:700,letterSpacing:1,marginBottom:4}}>STRATEGY</div>
           <div style={{fontSize:24,fontWeight:800,color:"#fff"}}>{session.circuit_short_name}</div>
@@ -331,8 +337,8 @@ function StrategyForm({ session, driver, user, onBack }) {
         ))}
       </div>
       <div style={{marginBottom:16}}>
-        <label style={{...s.label,marginBottom:8,display:"block"}}>Tire Compound</label>
-        <div style={s.tireRow}>
+        <label style={{...s.label,marginBottom:8,display:"block",textAlign:"center"}}>Tire Compound</label>
+        <div style={{...s.tireRow,justifyContent:"center"}}>
           {["Soft","Medium","Hard","Intermediate","Wet"].map(t => (
             <button key={t} onClick={()=>set("tireCompound",t)} style={{
               ...s.tireBtn,
@@ -343,9 +349,9 @@ function StrategyForm({ session, driver, user, onBack }) {
           ))}
         </div>
       </div>
-      <div style={{marginBottom:24}}>
-        <label style={{...s.label,marginBottom:8,display:"block"}}>Track Conditions</label>
-        <div style={s.weatherRow}>
+      <div style={{marginBottom:24,background:"#111",borderRadius:14,padding:16,border:"1px solid #1a1a1a"}}>
+        <label style={{...s.label,marginBottom:12,display:"block",textAlign:"center"}}>Track Conditions</label>
+        <div style={{...s.weatherRow,justifyContent:"center"}}>
           {weatherOptions.map(w => (
             <button key={w.name} onClick={()=>set("weatherCondition",w.name)} style={{
               ...s.weatherBtn,
@@ -464,6 +470,9 @@ export default function App() {
           <span style={{fontSize:26}}>🏁</span>
           <span style={s.title}>PitWall</span>
           <span style={s.tagline}>Your AI Race Strategist</span>
+        <div style={s.badge2025}>
+          <div style={s.badgeDot}/><span style={s.badgeText}>2025</span>
+        </div>
         </div>
         <div style={{display:"flex",alignItems:"center",gap:12}}>
           {user ? (
@@ -497,7 +506,7 @@ const s = {
   title:{fontSize:20,fontWeight:800,letterSpacing:-0.5},
   tagline:{color:"#555",fontSize:11,letterSpacing:0.5,marginLeft:4},
   content:{width:"100%"},
-  subtitle:{color:"#555",fontSize:12,padding:"20px 32px 12px",letterSpacing:0.5,textTransform:"uppercase"},
+  subtitle:{color:"#555",fontSize:12,padding:"20px 32px 12px",letterSpacing:0.5,textTransform:"none"},
   calList:{display:"flex",flexDirection:"column",gap:6,padding:"0 32px"},
   calCard:{display:"flex",alignItems:"center",background:"#111",borderRadius:12,overflow:"hidden",cursor:"pointer",transition:"background 0.15s"},
   calDate:{padding:"16px 20px",minWidth:72,textAlign:"center",flexShrink:0},
@@ -510,7 +519,7 @@ const s = {
   calArrow:{color:"#333",fontSize:22,paddingRight:20},
   screen:{padding:"24px 32px 60px"},
   back:{background:"none",border:"1px solid #222",color:"#888",padding:"8px 16px",borderRadius:8,cursor:"pointer",marginBottom:24,fontSize:13},
-  gradientHeader:{background:"linear-gradient(135deg,#1a0000 0%,#2d0000 50%,#111 100%)",borderRadius:16,padding:"24px",marginBottom:24,display:"flex",justifyContent:"space-between",alignItems:"center",border:"1px solid #2a0000"},
+  gradientHeader:{background:"linear-gradient(135deg,#1a0000 0%,#2d0000 50%,#111 100%)",borderRadius:16,padding:"24px",marginBottom:24,display:"flex",justifyContent:"space-between",alignItems:"center",border:"1px solid #2a0000",overflow:"hidden",position:"relative"},
   statsGrid:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:16},
   statCard:{background:"#111",borderRadius:14,padding:"20px 16px",textAlign:"center",border:"1px solid #1a1a1a"},
   lapRecord:{background:"#111",borderRadius:14,padding:24,border:"1px solid #e8002d33",marginBottom:24},
@@ -542,4 +551,7 @@ const s = {
   historyBtn:{background:"none",border:"1px solid #333",color:"#fff",padding:"8px 14px",borderRadius:8,cursor:"pointer",fontSize:13},
   center:{display:"flex",flexDirection:"column",alignItems:"center",paddingTop:80},
   spinner:{width:28,height:28,border:"2px solid #222",borderTop:"2px solid #e8002d",borderRadius:"50%",animation:"spin 0.8s linear infinite"},
+  badge2025:{display:"flex",alignItems:"center",gap:4,background:"rgba(232,0,45,0.15)",borderRadius:20,padding:"4px 10px",marginLeft:8},
+  badgeDot:{width:7,height:7,borderRadius:"50%",background:"#e8002d",flexShrink:0},
+  badgeText:{color:"#e8002d",fontSize:11,fontWeight:700},
 };
