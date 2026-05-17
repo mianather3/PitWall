@@ -7,11 +7,11 @@ class RaceViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
     
-    func fetchSessions() async {
+    func fetchSessions(year: Int = 2025) async {
         isLoading = true
         errorMessage = nil
         
-        guard let url = URL(string: "https://pitwallapi.azurewebsites.net/api/session") else {
+        guard let url = URL(string: "https://pitwallapi.azurewebsites.net/api/season?year=\(year)") else {
             errorMessage = "Invalid URL"
             isLoading = false
             return

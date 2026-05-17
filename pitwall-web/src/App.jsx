@@ -113,12 +113,13 @@ function AuthModal({ onClose, onAuth }) {
   );
 }
 
-function SessionList({ onSelect }) {
+function SessionList({ onSelect, year, setYear }) {
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get(`${API}/api/session`).then(res => {
+    setLoading(true);
+    axios.get(`${API}/api/season?year=${year}`).then(res => {
       const seen = new Set();
       const unique = res.data
         .filter(s => s.session_name==="Race")
@@ -126,7 +127,7 @@ function SessionList({ onSelect }) {
         .filter(s => seen.has(s.circuit_short_name) ? false : seen.add(s.circuit_short_name));
       setSessions(unique); setLoading(false);
     });
-  }, []);
+  }, [year]);
 
   if (loading) return <div style={s.center}><div style={s.spinner}/><p style={{color:"#888",marginTop:16,fontSize:14}}>Loading race calendar...</p></div>;
 
@@ -139,7 +140,26 @@ function SessionList({ onSelect }) {
 
   return (
     <div style={{padding:"0 0 40px"}}>
-      <p style={s.subtitle}>2025 Race Calendar — Select a race for circuit info</p>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"16px 32px 8px"}}>
+        <p style={{...s.subtitle,padding:0,margin:0}}>{year} Race Calendar — Select a race for circuit info</p>
+        <div style={{position:"relative",display:"inline-block"}}>
+          <select value={year} onChange={e=>setYear(Number(e.target.value))} style={{
+            background:"#1a1a1a",color:"#fff",border:"1px solid #333",
+            padding:"4px 32px 4px 14px",borderRadius:20,fontSize:11,fontWeight:600,
+            cursor:"pointer",outline:"none",appearance:"none",WebkitAppearance:"none",
+          }}>
+            {[2023,2024,2025].map(y => <option key={y} value={y}>{y} Season</option>)}
+          </select>
+          <span style={{
+            position:"absolute",right:10,top:"50%",transform:"translateY(-50%)",
+            pointerEvents:"none",color:"#fff",display:"flex",flexDirection:"column",
+            alignItems:"center",gap:1,lineHeight:1,
+          }}>
+            <span style={{fontSize:8}}>▲</span>
+            <span style={{fontSize:8}}>▼</span>
+          </span>
+        </div>
+      </div>
       <div style={s.calList}>
         {sessions.map(session => {
           const {month,day} = formatDate(session.date_start);
@@ -230,7 +250,7 @@ function DriverList({ session, onSelectDriver, onBack }) {
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:20}}>
         <div>
           <div style={{fontSize:22,fontWeight:800,color:"#fff"}}>{session.circuit_short_name}</div>
-          <div style={{fontSize:13,color:"#888",marginTop:2}}>{flag} {session.country_name}</div>
+          <div style={{fontSize:13,color:"#888",marginTop:2,display:"flex",alignItems:"center",gap:4}}>{flag} {session.country_name}</div>
         </div>
         <div style={{color:"#e8002d",fontSize:11,fontWeight:700,letterSpacing:1}}>DRIVER STANDINGS</div>
       </div>
@@ -437,6 +457,7 @@ function StrategyHistory({ user, onBack }) {
 
 export default function App() {
   const [user, setUser] = useState(null);
+  const [year, setYear] = useState(2025);
   const [showAuth, setShowAuth] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [selected, setSelected] = useState(null);
@@ -471,7 +492,7 @@ export default function App() {
           <span style={s.title}>PitWall</span>
           <span style={s.tagline}>Your AI Race Strategist</span>
         <div style={s.badge2025}>
-          <div style={s.badgeDot}/><span style={s.badgeText}>2025</span>
+          <div style={s.badgeDot}/><span style={s.badgeText}>{year}</span>
         </div>
         </div>
         <div style={{display:"flex",alignItems:"center",gap:12}}>
@@ -491,7 +512,7 @@ export default function App() {
 
       <div style={s.content}>
         {showHistory && user && <StrategyHistory user={user} onBack={()=>setShowHistory(false)}/>}
-        {!showHistory && !selected && <SessionList onSelect={setSelected}/>}
+        {!showHistory && !selected && <SessionList onSelect={setSelected} year={year} setYear={setYear}/>}
         {!showHistory && selected && !showDrivers && !selectedDriver && <RaceInfo session={selected} onViewDrivers={()=>setShowDrivers(true)} onBack={()=>setSelected(null)}/>}
         {!showHistory && selected && showDrivers && !selectedDriver && <DriverList session={selected} onSelectDriver={setSelectedDriver} onBack={()=>setShowDrivers(false)}/>}
         {!showHistory && selected && selectedDriver && <StrategyForm session={selected} driver={selectedDriver} user={user} onBack={()=>setSelectedDriver(null)}/>}

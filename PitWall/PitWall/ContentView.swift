@@ -1,7 +1,11 @@
 import SwiftUI
+import Supabase
 
 struct ContentView: View {
+    @Binding var userEmail: String
+    @Binding var isAuthenticated: Bool
     @StateObject private var viewModel = RaceViewModel()
+    @State private var selectedYear = 2025
 
     var body: some View {
         NavigationView {
@@ -25,7 +29,7 @@ struct ContentView: View {
                             Circle()
                                 .fill(Color.red)
                                 .frame(width: 7, height: 7)
-                            Text("2025")
+                            Text(String(selectedYear))
                                 .font(.system(size: 11, weight: .bold))
                                 .foregroundColor(.red)
                         }
@@ -33,17 +37,71 @@ struct ContentView: View {
                         .padding(.vertical, 5)
                         .background(Color.red.opacity(0.15))
                         .cornerRadius(20)
+
+                        Button(action: {
+                            Task {
+                                try? await supabase.auth.signOut()
+                                isAuthenticated = false
+                                userEmail = ""
+                            }
+                        }) {
+                            Text(userEmail.isEmpty ? "Sign In" : "Sign Out")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 6)
+                                .background(Color(white: 0.12))
+                                .cornerRadius(20)
+                                .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color(white: 0.2), lineWidth: 1))
+                        }
                     }
                     .padding(.horizontal, 16)
                     .padding(.vertical, 14)
                     .background(Color(white: 0.04))
 
-                    Text("2025 Race Calendar — Tap a race for circuit info")
-                        .font(.system(size: 11))
-                        .foregroundColor(Color(white: 0.35))
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 10)
+                    HStack {
+                        Text("\(String(selectedYear)) Race Calendar — Tap a race for circuit info")
+                            .font(.system(size: 11))
+                            .foregroundColor(Color(white: 0.35))
+                        Spacer()
+                        Menu {
+                            ForEach([2023, 2024, 2025] as [Int], id: \.self) { yr in
+                                Button {
+                                    selectedYear = yr
+                                    Task { await viewModel.fetchSessions(year: yr) }
+                                } label: {
+                                    HStack {
+                                        Text("\(String(yr)) Season")
+                                        if yr == selectedYear {
+                                            Spacer()
+                                            Image(systemName: "checkmark")
+                                        }
+                                    }
+                                }
+                            }
+                        } label: {
+                            HStack(spacing: 4) {
+                                Text("\(String(selectedYear)) Season")
+                                    .font(.system(size: 10, weight: .medium))
+                                    .foregroundColor(.white)
+                                VStack(spacing: 1) {
+                                    Text("▲").font(.system(size: 7))
+                                    Text("▼").font(.system(size: 7))
+                                }
+                                .foregroundColor(.white)
+                            }
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 4)
+                            .background(Color(white: 0.1))
+                            .cornerRadius(20)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 20)
+                                    .stroke(Color(white: 0.2), lineWidth: 1)
+                            )
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
 
                     if viewModel.isLoading {
                         Spacer()
@@ -157,5 +215,5 @@ struct RaceCardView: View {
 }
 
 #Preview {
-    ContentView()
+    ContentView(userEmail: .constant(""), isAuthenticated: .constant(true))
 }

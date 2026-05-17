@@ -1,17 +1,18 @@
-//
-//  PitWallApp.swift
-//  PitWall
-//
-//  Created by Mian Ather Ali on 3/30/26.
-//
-
 import SwiftUI
+import Supabase
 
 @main
 struct PitWallApp: App {
+    @State private var isAuthenticated = false
+    @State private var userEmail = ""
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            if isAuthenticated {
+                ContentView(userEmail: $userEmail, isAuthenticated: $isAuthenticated)
+            } else {
+                AuthView(isAuthenticated: $isAuthenticated, userEmail: $userEmail)
+            }
         }
     }
 }

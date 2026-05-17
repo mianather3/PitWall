@@ -72,7 +72,7 @@ struct StrategyView: View {
                             ))
                             .overlay(
                                 RoundedRectangle(cornerRadius: 16)
-                                    .stroke(teamColor.opacity(0.3), lineWidth: 1)
+                                    .stroke(Color.red.opacity(0.1), lineWidth: 1)
                             )
 
                         HStack(alignment: .top) {

@@ -15,12 +15,21 @@ app.UseSwagger();
 app.UseSwaggerUI();
 app.UseCors();
 
-// Get all 2025 F1 sessions
+// Get all F1 sessions (defaults to 2025)
 app.MapGet("/api/session", async (IHttpClientFactory factory) =>
 {
     var client = factory.CreateClient();
     var response = await client.GetStringAsync(
         "https://api.openf1.org/v1/sessions?session_type=Race&year=2025");
+    return Results.Content(response, "application/json");
+});
+
+// Get F1 sessions by year
+app.MapGet("/api/season", async (int year, IHttpClientFactory factory) =>
+{
+    var client = factory.CreateClient();
+    var response = await client.GetStringAsync(
+        $"https://api.openf1.org/v1/sessions?session_type=Race&year={year}");
     return Results.Content(response, "application/json");
 });
 
